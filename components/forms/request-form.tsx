@@ -17,10 +17,19 @@ import { useCreateRequestMutation } from "@/features/requests/api/requests-api"
 import { useTranslation } from "@/hooks/use-translation"
 import { Notifications } from "@/lib/services/notification-service"
 
+const TITLE_MAX = 80
+const DESCRIPTION_MAX = 1000
+
 const requestSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(TITLE_MAX, `Title must be at most ${TITLE_MAX} characters`),
   category: z.enum(["technical", "billing", "general", "support"]),
-  description: z.string().min(1, "Description is required"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(DESCRIPTION_MAX, `Description must be at most ${DESCRIPTION_MAX} characters`),
 })
 
 type RequestFormData = z.infer<typeof requestSchema>
@@ -90,7 +99,7 @@ export function RequestForm({ onSuccess }: RequestFormProps) {
       <CardHeader>
         <CardTitle>{t("createRequest")}</CardTitle>
         <CardDescription>
-          {t("loginSubtitle")}
+          {t("createRequestSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -105,9 +114,13 @@ export function RequestForm({ onSuccess }: RequestFormProps) {
                   <FormControl>
                     <Input 
                       placeholder={t("titlePlaceholder")}
+                      maxLength={TITLE_MAX}
                       {...field}
                     />
                   </FormControl>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {(field.value?.length ?? 0)}/{TITLE_MAX}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -148,9 +161,13 @@ export function RequestForm({ onSuccess }: RequestFormProps) {
                     <Textarea
                       placeholder={t("descriptionPlaceholder")}
                       rows={6}
+                      maxLength={DESCRIPTION_MAX}
                       {...field}
                     />
                   </FormControl>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {(field.value?.length ?? 0)}/{DESCRIPTION_MAX}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

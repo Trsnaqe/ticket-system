@@ -37,6 +37,7 @@ export const translations = {
     support: "Support",
 
     createRequest: "Create Request",
+    createRequestSubtitle: "Open a ticket for help. Use a clear title and detailed description.",
     title: "Title",
     category: "Category",
     description: "Description",
@@ -57,6 +58,8 @@ export const translations = {
     addMessage: "Add Message",
     typeMessage: "Type your message...",
     send: "Send",
+    showMore: "Show more",
+    showLess: "Show less",
     updateStatus: "Update Status",
     noMessages: "No messages yet",
     requestNotFound: "Request not found",
@@ -160,6 +163,7 @@ export const translations = {
     support: "Destek",
 
     createRequest: "Talep Oluştur",
+    createRequestSubtitle: "Yardım almak için talep açın. Açık bir başlık ve detaylı açıklama yazın.",
     title: "Başlık",
     category: "Kategori",
     description: "Açıklama",
@@ -180,6 +184,8 @@ export const translations = {
     addMessage: "Mesaj Ekle",
     typeMessage: "Mesajınızı yazın...",
     send: "Gönder",
+    showMore: "Daha fazla göster",
+    showLess: "Daha az göster",
     updateStatus: "Durumu Güncelle",
     noMessages: "Henüz mesaj yok",
     requestNotFound: "Talep bulunamadı",

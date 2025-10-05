@@ -8,7 +8,7 @@ import { useAppSelector } from "@/lib/store/hooks"
 import { useAddMessageMutation } from "@/features/requests/api/requests-api"
 import { Notifications } from "@/lib/services/notification-service"
 import { Send, User } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import type { Message } from "@/types/request"
 
 interface MessageListProps {
@@ -22,6 +22,10 @@ export function MessageList({ requestId, messages }: MessageListProps) {
   const [addMessageApi, { isLoading: isAdding }] = useAddMessageMutation()
   const [newMessage, setNewMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [expandedById, setExpandedById] = useState<Record<string, boolean>>({})
+
+  const MAX_MESSAGE_LENGTH_INPUT = 1000
+  const DISPLAY_PREVIEW_LENGTH = 500
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return
@@ -34,7 +38,7 @@ export function MessageList({ requestId, messages }: MessageListProps) {
         message: {
           userId: user.id,
           username: user.username,
-          content: newMessage.trim(),
+          content: newMessage.trim().slice(0, MAX_MESSAGE_LENGTH_INPUT),
         },
       }).unwrap()
 
@@ -58,6 +62,14 @@ export function MessageList({ requestId, messages }: MessageListProps) {
     return new Date(dateString).toLocaleString()
   }
 
+  const canSend = useMemo(() => {
+    return Boolean(newMessage.trim()) && !isSubmitting && !isAdding
+  }, [newMessage, isSubmitting, isAdding])
+
+  const toggleExpand = (id: string) => {
+    setExpandedById((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
   return (
     <Card variant="default" size="default">
       <CardHeader>
@@ -77,7 +89,7 @@ export function MessageList({ requestId, messages }: MessageListProps) {
                   message.userId === user?.id ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="flex gap-3 max-w-[80%] sm:max-w-[60%]">
+                <div className="flex gap-3 max-w-[80%] sm:max-w-[60%] min-w-0">
                   <div className={`flex-shrink-0 ${
                     message.userId === user?.id ? "order-2" : "order-1"
                   }`}>
@@ -86,7 +98,7 @@ export function MessageList({ requestId, messages }: MessageListProps) {
                     </div>
                   </div>
                   
-                  <div className={`flex-1 ${
+                  <div className={`flex-1 min-w-0 ${
                     message.userId === user?.id ? "order-1" : "order-2"
                   }`}>
                     <div
@@ -104,9 +116,24 @@ export function MessageList({ requestId, messages }: MessageListProps) {
                           {formatDate(message.createdAt)}
                         </span>
                       </div>
-                      <div className="text-sm leading-relaxed">
-                        {message.content}
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap break-words break-all">
+                        {message.content.length > DISPLAY_PREVIEW_LENGTH && !expandedById[message.id]
+                          ? `${message.content.slice(0, DISPLAY_PREVIEW_LENGTH)}…`
+                          : message.content}
                       </div>
+                      {message.content.length > DISPLAY_PREVIEW_LENGTH && (
+                        <div className={`mt-2 ${message.userId === user?.id ? "text-right" : "text-left"}`}>
+                          <button
+                            type="button"
+                            className={`text-xs underline opacity-90 hover:opacity-100 ${
+                              message.userId === user?.id ? "text-primary-foreground" : "text-foreground"
+                            }`}
+                            onClick={() => toggleExpand(message.id)}
+                          >
+                            {expandedById[message.id] ? t("showLess") : t("showMore")}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -116,21 +143,29 @@ export function MessageList({ requestId, messages }: MessageListProps) {
         )}
 
         <div className="pt-4 border-t">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Textarea
-              placeholder={t("typeMessage")}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={3}
-              disabled={isSubmitting}
-              className="w-full"
-            />
+          <div className="flex flex-col sm:flex-row sm:items-end gap-2 min-w-0">
+            <div className="flex-1 min-w-0">
+              <Textarea
+                placeholder={t("typeMessage")}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={3}
+                disabled={isSubmitting}
+                maxLength={MAX_MESSAGE_LENGTH_INPUT}
+                wrap="soft"
+                className="w-full h-24 overflow-y-auto overflow-x-hidden resize-none break-words break-all"
+              />
+              <div className="mt-1 text-xs text-muted-foreground">
+                {newMessage.length}/{MAX_MESSAGE_LENGTH_INPUT}
+              </div>
+            </div>
             <Button
               onClick={handleSendMessage}
-              disabled={!newMessage.trim() || isSubmitting || isAdding}
-              size="icon"
+              disabled={!canSend}
+              size="sm"
               className="flex-shrink-0 w-full sm:w-auto"
+              aria-label={t("send")}
             >
               <Send className="h-4 w-4" />
             </Button>
