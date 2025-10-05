@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { login, mockUsers } from "@/lib/store/slices/auth-slice"
+import { requestsApi } from "@/features/requests/api/requests-api"
 import { useTranslation } from "@/hooks/use-translation"
 import { Notifications } from "@/lib/services/notification-service"
 import { LanguageSelector } from "@/components/language-selector"
@@ -46,6 +47,7 @@ export function LoginForm() {
 
       if (userRecord && userRecord.password === password) {
         dispatch(login(data))
+        dispatch(requestsApi.util.resetApiState())
         Notifications.LOGIN_SUCCESS(t("loginSuccess"))
         router.push("/requests")
       } else {

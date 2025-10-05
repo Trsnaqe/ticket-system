@@ -62,6 +62,9 @@ export const translations = {
     requestNotFound: "Request not found",
     requestNotFoundMessage: "The request you're looking for doesn't exist or has been deleted.",
     accessDenied: "Access denied",
+    unauthorized: "Unauthorized",
+    forbidden: "Forbidden",
+    notFound: "Not Found",
 
     userProfile: "User Profile",
     userInformation: "User Information",
@@ -182,6 +185,9 @@ export const translations = {
     requestNotFound: "Talep bulunamadı",
     requestNotFoundMessage: "Aradığınız talep mevcut değil veya silinmiş.",
     accessDenied: "Erişim reddedildi",
+    unauthorized: "Yetkisiz",
+    forbidden: "Yasak",
+    notFound: "Bulunamadı",
 
     userProfile: "Kullanıcı Profili",
     userInformation: "Kullanıcı Bilgileri",

@@ -19,19 +19,21 @@ import type { RequestStatus, RequestCategory } from "@/types/request"
 import { Clock, MessageSquare, Plus, Search, Filter, X } from "lucide-react"
 
 export default function RequestsPage() {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
+  const user = useAppSelector((state) => state.auth.user)
   const [page, setPage] = useState(1)
   const pageSize = DEFAULT_PAGE_SIZE
-  const { data: paged = { items: [], total: 0, page: 1, pageSize }, isLoading, isError } = useGetRequestsQuery({ page, limit: pageSize })
+  const { data: paged = { items: [], total: 0, page: 1, pageSize }, isLoading, isError } = useGetRequestsQuery(
+    { page, limit: pageSize },
+    { skip: !user }
+  )
   const apiRequests = paged.items
-  const user = useAppSelector((state) => state.auth.user)
 
   const [nameFilter, setNameFilter] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<RequestCategory | "all">("all")
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("all")
 
   const filteredRequests = useMemo(() => {
-    // API already filters by request visibility per role; only apply UI filters
     return apiRequests.filter((request) => {
       if (nameFilter && !request.title.toLowerCase().includes(nameFilter.toLowerCase())) {
         return false
@@ -47,7 +49,7 @@ export default function RequestsPage() {
 
       return true
     })
-  }, [apiRequests, nameFilter, categoryFilter, statusFilter])
+  }, [apiRequests, nameFilter, categoryFilter, statusFilter, user])
 
   const getStatusColor = (status: RequestStatus) => {
     switch (status) {
@@ -239,7 +241,7 @@ export default function RequestsPage() {
                           <MessageSquare className="h-4 w-4" />
                           {request.messages.length}
                         </div>
-                        {user?.role === "admin" && <span className="ml-auto">by {request.username}</span>}
+                        <span className="ml-auto">{language === "en" ? "by " : ""}{request.username}</span>
                       </div>
                     </CardContent>
                   </Card>

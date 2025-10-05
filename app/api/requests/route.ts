@@ -8,9 +8,11 @@ import { getUserFromHeaders } from "@/app/api/_auth"
 export async function GET(req: NextRequest) {
   const user = getUserFromHeaders(req)
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+  
   const all = listRequests()
   const visible = user.role === "admin" ? all : all.filter((r) => r.userId === user.id)
-
+  
+  
   const { searchParams } = new URL(req.url)
   const pageParam = Number(searchParams.get("page") ?? "1")
   const limitParam = Number(searchParams.get("limit") ?? "8")

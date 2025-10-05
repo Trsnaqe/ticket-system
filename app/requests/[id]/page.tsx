@@ -21,7 +21,7 @@ export default function RequestDetailPage({ params }: { params: { id: string } }
   const { t } = useTranslation()
   const router = useRouter()
   const user = useAppSelector((state) => state.auth.user)
-  const { data: request, isLoading, isError } = useGetRequestByIdQuery(params.id)
+  const { data: request, isLoading, isError, error } = useGetRequestByIdQuery(params.id, { skip: !user })
 
   useEffect(() => {
     if (request && user) {
@@ -34,11 +34,20 @@ export default function RequestDetailPage({ params }: { params: { id: string } }
   }, [request, user, router, t])
 
   useEffect(() => {
-    if (!isLoading && isError) {
-      Notifications.REQUEST_NOT_FOUND(t("requestNotFound"))
-      router.push("/requests")
+    if (!isLoading && isError && error) {
+      const status = 'status' in error ? error.status : null
+      if (status === 401) {
+        Notifications.UNAUTHORIZED_REQUEST(t("unauthorized"))
+        router.push("/login")
+      } else if (status === 403) {
+        Notifications.UNAUTHORIZED_REQUEST(t("accessDenied"))
+        router.push("/requests")
+      } else {
+        Notifications.REQUEST_NOT_FOUND(t("requestNotFound"))
+        router.push("/requests")
+      }
     }
-  }, [isLoading, isError, router, t])
+  }, [isLoading, isError, error, router, t])
 
   if (isLoading) {
     return (
@@ -57,6 +66,41 @@ export default function RequestDetailPage({ params }: { params: { id: string } }
     )
   }
 
+  if (isError && error) {
+    const status = 'status' in error ? error.status : null
+    let errorMessage = t("requestNotFound")
+    let errorTitle = t("notFound")
+    
+    if (status === 401) {
+      errorMessage = t("unauthorized")
+      errorTitle = t("unauthorized")
+    } else if (status === 403) {
+      errorMessage = t("accessDenied")
+      errorTitle = t("forbidden")
+    }
+    
+    return (
+      <AuthGuard>
+        <div className="min-h-screen bg-muted/30">
+          <Navbar />
+          <main className="container mx-auto px-4 py-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>{errorTitle}</CardTitle>
+              </CardHeader>
+              <CardContent className="py-12 text-center">
+                <p className="text-muted-foreground">{errorMessage}</p>
+                <Button onClick={() => router.push("/requests")} className="mt-4">
+                  {t("requests")}
+                </Button>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </AuthGuard>
+    )
+  }
+
   if (!request) {
     return (
       <AuthGuard>
@@ -65,10 +109,7 @@ export default function RequestDetailPage({ params }: { params: { id: string } }
           <main className="container mx-auto px-4 py-8">
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">Request not found</p>
-                <Button onClick={() => router.push("/requests")} className="mt-4">
-                  {t("requests")}
-                </Button>
+                <p className="text-muted-foreground">{t("loading")}</p>
               </CardContent>
             </Card>
           </main>

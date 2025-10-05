@@ -14,7 +14,10 @@ import { useGetRequestsQuery } from "@/features/requests/api/requests-api"
 export default function ProfilePage() {
   const { t } = useTranslation()
   const user = useAppSelector((state) => state.auth.user)
-  const { data: paged = { items: [], total: 0, page: 1, pageSize: 0 } } = useGetRequestsQuery({ page: 1, limit: 1000 })
+  const { data: paged = { items: [], total: 0, page: 1, pageSize: 0 } } = useGetRequestsQuery(
+    { page: 1, limit: 1000 },
+    { skip: !user }
+  )
   const apiRequests = paged.items
   const isClient = useClientSide()
 

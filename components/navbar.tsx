@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/slices/auth-slice"
+import { requestsApi } from "@/features/requests/api/requests-api"
 import { useTranslation } from "@/hooks/use-translation"
 import { LogOut, Ticket } from "lucide-react"
 
@@ -18,6 +19,7 @@ export function Navbar() {
 
   const handleLogout = () => {
     dispatch(logout())
+    dispatch(requestsApi.util.resetApiState())
     router.push("/login")
   }
 
